@@ -31,7 +31,7 @@ pub struct RequestMetadata {
 }
 
 // Defined per XKS Proxy API spec.
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 #[allow(non_snake_case)]
 pub struct GetHealthStatusRequest {
     requestMetadata: RequestMetadata,
@@ -118,6 +118,16 @@ pub async fn enact(
         HEALTH,
         kmsRequestId = payload.requestMetadata.kmsRequestId.as_str()
     );
+
+    for i in 1..30 {
+        let uri_path_prefix_clone = uri_path_prefix.clone();
+        let payload_clone = payload.clone();
+        tokio::spawn(async move {
+            tracing::info!("{i} thread get_health_status");
+            let _ = do_enact(uri_path_prefix_clone, payload_clone).await;
+        });
+    }
+
     do_enact(uri_path_prefix, payload).instrument(span).await
 }
 

@@ -43,7 +43,7 @@ pub struct RequestMetadata {
 }
 
 // Defined per XKS Proxy API spec.
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 #[allow(non_snake_case)]
 pub struct GetKeyMetadataRequest {
     requestMetadata: RequestMetadata,
@@ -81,6 +81,19 @@ pub async fn enact(
         METADATA,
         kmsRequestId = payload.requestMetadata.kmsRequestId.as_str()
     );
+
+    for i in 1..30 {
+        let uri_path_prefix_clone = uri_path_prefix.clone();
+        let kid = key_id.clone();
+        let payload_clone = payload.clone();
+        tokio::spawn(async move {
+            let session_pool = &P11_SESSION_POOL;
+            tracing::info!("{i} thread before status: {:?}", session_pool.status());
+            let _ = do_enact(uri_path_prefix_clone, kid, payload_clone).await;
+            tracing::info!("{i} thread after status: {:?}", session_pool.status());
+        });
+    }
+
     async move { do_enact(uri_path_prefix, key_id, payload).await }
         .instrument(span)
         .await

@@ -56,7 +56,7 @@ const REQUEST_META_DATA: &str = "requestMetadata";
 
 // Defined per XKS Proxy API spec.
 // Supported Encryption Algorithms
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 #[allow(dead_code)]
 #[allow(non_camel_case_types)]
 pub enum EncryptionAlgorithm {
