@@ -414,8 +414,5 @@ pub fn is_ckr_fatal(pkcs11_err: &rust_pkcs11::errors::Error) -> bool {
 }
 
 pub fn is_ckr_device_error(pkcs11_err: &rust_pkcs11::errors::Error) -> bool {
-    matches!(
-        pkcs11_err,
-        rust_pkcs11::errors::Error::Pkcs11(CKR_DEVICE_ERROR)
-    )
+    is_ckr_fatal(pkcs11_err)
 }
